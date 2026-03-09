@@ -1,0 +1,1 @@
+# snow-status-generator-chrome-extension
