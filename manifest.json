@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "ServiceNow Incident Summary",
+    "version": "1.0",
+    "description": "Creates summaries for ServiceNow incidents visible to the supporter.",
+    "permissions": [
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://servicenow.idf.il/*"
+    ],
+    "action": {
+        "default_title": "Generate Incident Summary"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://servicenow.idf.il/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "world": "MAIN",
+            "css": [
+                "style.css"
+            ],
+            "all_frames": true,
+            "run_at": "document_idle"
+        }
+    ]
+}
