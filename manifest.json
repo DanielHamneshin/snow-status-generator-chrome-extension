@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "ServiceNow Incident Summary",
+    "name": "ServiceNow Status Generator",
     "version": "1.0",
     "description": "Creates summaries for ServiceNow incidents visible to the supporter.",
     "permissions": [
