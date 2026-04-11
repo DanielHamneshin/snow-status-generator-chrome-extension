@@ -1,3 +1,59 @@
+const host = 'http://localhost:11434';   // default, change if you used a different port
+
+async function chat(ticketDetails) {
+    
+  const host = 'http://localhost:11434';
+  
+  // Construct the prompt using your ticketDetails
+  const prompt = `
+  אני משתמש ב servicenow ואני רוצה שתיצור לי סטטוס על incident. צירפתי אובייקט שמכיל את הפרטים אסביר מה אני רוצה שתיצור על פי הפרטים:
+            אני רוצה שהתשובה תיראה כך בעברית כמובן:
+            מספר טיקט: ticketNumber שמופיע באובייקט
+            מצב: state שמופיע באובייקט
+            לקוח: caller שמופיע באובייקט
+            כותרת: shortDescription שמופיע באובייקט
+            סטטוס: ב סטטוס אני רוצה שתסכם מה שמופיע ב shortDescription ב description וב comments בצורה שתתאר את הבעיה כפי שהלקוח תיאר ב shortDescription
+            ואם יש תגובות נוספות ב comments שמתייחסות לתיאור הבעיה תוסיף גם אותן לתיאור הבעיה. שיים לב שכשאתה מסתכל על התגובות מצורף מי הגיב.
+            אם המגיב הוא ה caller זה תגובה של הלקוח.
+            אם המגיב הוא supporter זה אומר שמישהו מצוות אחר הגיב על זה אז צריך לציין את זה כשאתה מוסיף את התגובה לסטטוס אם היא רלוונטית לסטטוס תציין שתומך מצוות אחר הגיב את התגובה
+            אם המגיב הוא team supporter למשל Cloud-IT supporter זה אומר שמישהו מהצוות הנוכחי הגיב את התגובה הזאת אז לתגובות האלה תתן את המשקל המשמעותי בסטטוס.
+            לתגובות שתומך מצוות אחר הגיב תתייחס כהערה צדדית
+            ואז בסטטוס העיקרי תתאר לפי ההתכתבות ולפי מצב הטיקט את התהליך שנעשה כלומר אילו פעולות נעשו על מנת לפתור את התקלה ולמה ממתינים כלומר מה מעכב את פתרון הטיקט.
+            יש להתייחס למצב הטיקט אם זה On Hold זה ממתין לתשובת הלקוח. אם זה In Progress זה ממתין לתשובת התומך
+            אני לא רוצה שתכתוב את כל התגובות אני רק צריך שתכתוב את הפעולות שנעשו כדי לפתור את הבעיה ואיפה זה עומד עכשיו ותכתוב את זה בצורה של סיכום
+            לא צריך לצטט שום דבר בסטטוס
+            בסוף אני צריך שסטטוס ייראה כך (בנוסף לכל השדות שציינתי למעלה):
+            בעיה:
+            צעדים שננקטו:
+            בצעדים שננקטו אני רוצה שלא תצטט שום תגובה אני רק רוצה שתסכם את התגובות מה שרלוונטי כמובן לבעיה בתוך תיאור הבעיה ומה שרלוונטי לפתרון לסכם בצעדים שננקטו
+            אני מדגיש שוב לא לצטט שום תגובה
+            מה קורה עכשיו עם הטיקט:
+  ${JSON.stringify(ticketDetails)}`;
+
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({
+      type: 'chat',
+      url: `${host}/api/chat`,
+      body: {
+        model: 'llama3',
+        messages: [{ role: 'user', content: prompt }],
+        stream: false
+      }
+    }, (response) => {
+      if (chrome.runtime.lastError) {
+        return reject(new Error(chrome.runtime.lastError.message));
+      }
+      if (response.error) {
+        return reject(new Error(response.error));
+      }
+      
+      console.log('Assistant says:', response.data.message.content);
+      resolve(response.data.message.content);
+    });
+  });
+}
+
+
 const main = async () => {
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -159,6 +215,13 @@ const main = async () => {
 
         const ticketDetails = { ticketNumber, caller, state, shortDescription, description, comments };
         console.log(JSON.stringify(ticketDetails));
+
+
+        try {
+        await chat(ticketDetails);
+    } catch (err) {
+        console.error("Ollama Error:", err);
+    }
 
 
     }

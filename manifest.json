@@ -8,11 +8,15 @@
         "scripting"
     ],
     "host_permissions": [
-        "https://servicenow.idf.il/*"
+        "https://servicenow.idf.il/*",
+        "http://localhost:11434/*"
     ],
     "action": {
         "default_title": "Generate Incident Summary"
     },
+      "background": {
+    "service_worker": "background.js"
+  },
     "content_scripts": [
         {
             "matches": [
@@ -21,7 +25,6 @@
             "js": [
                 "content.js"
             ],
-            "world": "MAIN",
             "css": [
                 "style.css"
             ],
